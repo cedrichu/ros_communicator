@@ -1,0 +1,42 @@
+## IDE Settings
+.idea/
+.tern-port
+.dir-locals.el
+.vscode
+cmake-build-*/
+*.iml
+*.swp
+
+## Backup files
+*~
+.eslintrc.json
+.DS_Store
+
+## Python
+*.pyc
+*.egg*
+MANIFEST
+
+## Python virtual environment
+env/
+environment/
+
+## Python testing
+.tox/
+.coverage*
+htmlcov/
+
+## npm temp files
+npm-debug.log
+package-lock.json
+
+# Testntools
+*.retry
+fetchcore_testing/bagfiles
+fetchcore_testing/scripts/*.txt
+dump.rdb
+
+## Docker
+Dockerfile
+docker-compose.yaml
+local_settings.py
