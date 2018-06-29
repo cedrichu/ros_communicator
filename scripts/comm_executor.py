@@ -22,9 +22,9 @@ class Communicator():
 		self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
 		#Mock for PC
-		comm.nodes = [dict(x=-26, y=-135, id=11)]
-		comm.current_node = comm.nodes[0]
-		comm.current_pose = dict(x=-26, y=-134, theta=-2)
+		# comm.nodes = [dict(x=-26, y=-135, id=11)]
+		# comm.current_node = comm.nodes[0]
+		# comm.current_pose = dict(x=-26, y=-134, theta=-2)
 
 		#wait for lanes and current_pose to be ready
 		while not comm.nodes or not comm.current_pose:
@@ -51,7 +51,7 @@ class Communicator():
 		print 'Current pose:', comm.current_pose
 
 	def start(self):
-		#self.checker.start()
+		self.checker.start()
 		self.receiver.start()
 
 
