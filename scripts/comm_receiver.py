@@ -71,7 +71,7 @@ class CommReceiver(service.persistent):
 
     def _request_handler(self, data):      
         try:
-            print 'Received', data
+            rospy.loginfo('Received: '+ data)
             msg = messages.parse(data)
         except Exception as e:
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
@@ -79,14 +79,14 @@ class CommReceiver(service.persistent):
             response = [comm.params['id'], comm.current_node['id'], comm.current_distance, comm.current_vel]
             response_msg = messages.create('request-info',comm.params['id'], msg['orig'],'comm_receiver', response)
             messages.send(comm.params['ports'][msg['orig']], response_msg)
-            #print "response", response_msg
+            rospy.loginfo("Sent: " + response_msg)
 
 
     def _publish_coordinated_vel(self, vel):
-        print 'thread starts', threading.current_thread()
+        rospy.loginfo('thread starts '+ str(threading.current_thread()))
         while not self.stop_pub.is_set():
             self.pub.publish(vel)
-        print 'thread stops!', threading.current_thread()
+        rospy.loginfo('thread stops! '+ str(threading.current_thread()))
 
 
     def _intersection_coordination(self):
@@ -96,24 +96,35 @@ class CommReceiver(service.persistent):
         time_to_node = dict()
         #get neighbors' time_to_node 
         for key,value in comm.approaching_dict.iteritems():
-            if value[1] != 0.0:
-                time_to_node[key] = value[0]/value[1]
+            time_to_node[key] = value[0]#/max(value[1], 0.1)
         #Add my time_to_node into the dict
-        print  'current dist:', comm.current_distance, 'current vel:', comm.current_vel
-        time_to_node[comm.params['id']] = comm.current_distance/comm.current_vel
-        print 'current time_to_node:', time_to_node[comm.params['id']]
+        rospy.loginfo('current distance: '+ str(comm.current_distance)+ ' current velocity: '+ str(comm.current_vel))
+        time_to_node[comm.params['id']] = comm.current_distance#/max(comm.current_vel, 0.1)
+        rospy.loginfo('current time_to_node: '+ str(time_to_node[comm.params['id']]))
 
         sorted_ttn = sorted(time_to_node.items(), key=operator.itemgetter(1))
         for i,ttn in enumerate(sorted_ttn):
             if ttn[0] == comm.params['id']:
-                vel.linear.x = comm.current_distance / (10*time_to_node[comm.params['id']])#(sorted_ttn[0][1] + i*comm.delta)
+                rank_t = (10**i)*sorted_ttn[0][1]
+                vel.linear.x = (1-i)*0.5#comm.current_distance / rank_t
+                rospy.loginfo('Rank: '+ str(i)+' Vel: '+str(vel.linear.x)+ ' TTN: '+str(rank_t)) 
                 break
 
         return vel
 
+    def _maintain_approaching_robots(self, msg):
+        n_id, n_node_id, n_dist, n_vel = msg['data']
+        if n_node_id == comm.current_node['id']: 
+            comm.approaching_dict[n_id] = (n_dist, n_vel)
+        else:
+            # this robot already left the intersection
+            if n_node_id in comm.approaching_dict.keys():
+                comm.approaching_dict.pop(n_node_id)
+
+
     def _request_info_handler(self, data):
         try:
-            print 'Received', data, comm.current_node['id']
+            rospy.loginfo('Received: '+ data+' current_node: '+str(comm.current_node['id']))
             
             #stop current running pub thread
             self.stop_pub.set()
@@ -125,28 +136,29 @@ class CommReceiver(service.persistent):
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
         else:
             #Only if the robots that share same intersection will be added into the dict for coordination
-            if n_node_id == comm.current_node['id']: 
-                comm.approaching_dict[n_id] = (n_dist, n_vel)
+            self._maintain_approaching_robots(msg)
             #Got the same number of response as queries, and then start to coordinate 
             comm.send_count += 1
             if comm.send_count == len(comm.neighbor_list):
                 #if the list is empty, we don't need to apply velocity coordination
+                rospy.loginfo('approaching_dict: '+str(comm.approaching_dict))
                 if comm.approaching_dict: 
                     vel = self._intersection_coordination()
-                    print 'vel', vel
+                    rospy.loginfo(str(vel))
                     self.pub_vel_thread = threading.Thread(target=self._publish_coordinated_vel, args=(vel,))
                     self.stop_pub.clear()
-                    self.pub_vel_thread.start() 
+                    self.pub_vel_thread.start()
+                else:
+                    rospy.loginfo('rollback to single agent')
+                    self.stop_pub.set() #no other approach robots, then just stop control
                 comm.send_count = 0
                 comm.state = 'DONE'
                 rospy.loginfo('Current State: %s'%comm.state)
             #elif n_node in comm.nodes:
 
- 
-
     def _stop_handler(self, data):
         try:
-            print 'Received', data
+            rospy.loginfo('Received: '+ data)
             msg = messages.parse(data)
         except Exception as e:
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
@@ -154,18 +166,17 @@ class CommReceiver(service.persistent):
             response = [comm.params['id']]
             response_msg = messages.create('stop-resp',comm.params['id'], msg['orig'],'comm_receiver', response)
             messages.send(comm.params['ports'][msg['orig']], response_msg)
+            rospy.loginfo('Sent: '+ msg)
 
     def _stop_resp_handler(self, data):
         try:
-            print 'Received', data
+            rospy.loginfo('Received: '+ data)
             comm.send_count += 1
             if comm.send_count == len(comm.neighbor_list):
                 self.stop_pub.set()
                 comm.send_count = 0
         except Exception as e:
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
-
-
 
     def main(self):
 

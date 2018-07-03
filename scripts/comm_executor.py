@@ -37,7 +37,7 @@ class Communicator():
 	def _nodes_handler(self, msg):
 		for lane in msg.lanes:
 			comm.nodes.append(dict(x=lane.end.x, y=lane.end.y, id=lane.end_id))
-		print 'Nodes:', comm.nodes
+		rospy.loginfo('Nodes: '+str(comm.nodes))
 
 	def _vel_handler(self, msg):
 		comm.current_vel = msg.velocity.x
@@ -48,7 +48,7 @@ class Communicator():
 		_, _, angle = euler_from_quaternion(
 			[pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
 		comm.current_pose = dict(x=pose.position.x, y=pose.position.y, theta=angle)
-		print 'Current pose:', comm.current_pose
+		#rospy.loginfo('Current pose: '+str(comm.current_pose))
 
 	def start(self):
 		self.checker.start()

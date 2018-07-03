@@ -10,7 +10,7 @@ import numpy as np
 
 params = dict()
 
-params['id'] = 'sw11'
+params['id'] = 'freight3'
 params['queue'] = dict()
 params['queue']['batch'] = 50
 params['threshold'] = 1

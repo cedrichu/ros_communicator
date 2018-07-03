@@ -15,7 +15,7 @@ class CommChecker(service.persistent):
         self.name = 'comm_checker'
         self.daemon = False
 
-        self.rate = rospy.Rate(1) # 10hz
+        self.rate = rospy.Rate(10) # 10hz
         #variable for coordination
         self.current_node = None
         self.last_node = dict(x=0.0, y=0.0, id=-1)
@@ -44,6 +44,7 @@ class CommChecker(service.persistent):
                     msg_content = [comm.params['id']]
                     msg = messages.create('request',comm.params['id'], dest,'comm_checker', msg_content)
                     messages.send(comm.params['ports'][dest],msg)
+                    rospy.loginfo('Sent: '+ msg)
                 comm.state = 'QUERY'
                 rospy.loginfo('Current State: %s'%comm.state)     
 
@@ -54,6 +55,7 @@ class CommChecker(service.persistent):
                     msg_content = [comm.params['id']]
                     msg = messages.create('request',comm.params['id'], dest,'comm_checker', msg_content)
                     messages.send(comm.params['ports'][dest],msg)
+                    rospy.loginfo('Sent: '+ msg)
                 comm.state = 'QUERY'
                 rospy.loginfo('Current State: %s'%comm.state)
 
@@ -62,6 +64,7 @@ class CommChecker(service.persistent):
                     msg_content = [comm.params['id']]
                     msg = messages.create('stop',comm.params['id'], dest,'comm_checker', msg_content)
                     messages.send(comm.params['ports'][dest],msg)
+                    rospy.loginfo('Sent: '+ msg)
                 comm.approaching_dict.clear()
                 comm.state = 'IDLE'
                 rospy.loginfo('Current State: %s'%comm.state)
