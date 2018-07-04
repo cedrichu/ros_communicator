@@ -166,7 +166,7 @@ class CommReceiver(service.persistent):
             response = [comm.params['id']]
             response_msg = messages.create('stop-resp',comm.params['id'], msg['orig'],'comm_receiver', response)
             messages.send(comm.params['ports'][msg['orig']], response_msg)
-            rospy.loginfo('Sent: '+ msg)
+            rospy.loginfo('Sent: '+ response_msg)
 
     def _stop_resp_handler(self, data):
         try:

@@ -69,6 +69,18 @@ class CommChecker(service.persistent):
                 comm.state = 'IDLE'
                 rospy.loginfo('Current State: %s'%comm.state)
 
+        elif comm.state == 'QUERY':
+            
+            if self.current_node != self.last_node:
+                for dest in neighbors:
+                    msg_content = [comm.params['id']]
+                    msg = messages.create('stop',comm.params['id'], dest,'comm_checker', msg_content)
+                    messages.send(comm.params['ports'][dest],msg)
+                    rospy.loginfo('Sent: '+ msg)
+                comm.approaching_dict.clear()
+                comm.state = 'IDLE'
+                rospy.loginfo('Current State: %s'%comm.state)
+
         self.last_node = self.current_node            
         self.rate.sleep()
 
