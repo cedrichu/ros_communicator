@@ -118,8 +118,8 @@ class CommReceiver(service.persistent):
             comm.approaching_dict[n_id] = (n_dist, n_vel)
         else:
             # this robot already left the intersection
-            if n_node_id in comm.approaching_dict.keys():
-                comm.approaching_dict.pop(n_node_id)
+            if n_id in comm.approaching_dict.keys():
+                comm.approaching_dict.pop(n_id)
 
 
     def _request_info_handler(self, data):
