@@ -115,8 +115,6 @@ class sendQueue():
         try:
           self.conns[addr] = self.client(addr)
           self.conns[addr].start()
-          #surtrac.threads.append(self.conns[addr])
-          #self.threads.append(self.conns[addr])
         except Exception as e:
           rospy.logerr('Cannot create sending client for %s'%str(addr))
           return False
