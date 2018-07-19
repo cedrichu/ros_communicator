@@ -55,12 +55,11 @@ def get_current_node():
 	
 	best_node = None
 	closest_distance = 0.0
-	#try:
-	best_node, closest_distance = min(adjacent_nodes, key=lambda dist: dist[1])
+
+	if adjacent_nodes:
+		best_node, closest_distance = min(adjacent_nodes, key=lambda dist: dist[1])
 	current_node = best_node
 	current_distance = closest_distance
-	# except Exception as e:
-	# 	rospy.logwarn('No valid adjacent_nodes')
 	return best_node, closest_distance
 
 #used for judging if the robot passes the node on the map 
