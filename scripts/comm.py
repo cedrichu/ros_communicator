@@ -20,10 +20,12 @@ neighbor_list = ['freight20']
 
 params['ports'] = dict()
 params['ports']['local'] = dict()
-params['ports']['local']['receiver'] = ('',60998) 
-params['ports'][neighbor_list[0]] = (neighbor_list[0],60998)
+params['ports']['local']['receiver'] = ('',1) 
 
+params['ports'][neighbor_list[0]] = ('00:16:6F:EB:05:77',1) #freight20
+#params['ports'][neighbor_list[0]] = ('00:16:6F:EA:FE:D3',1) #freight3
 
+params['rate'] = 5
 
 
 #shared information?

@@ -4,6 +4,7 @@ import socket
 import time
 import threading
 import operator
+import math
 
 
 
@@ -67,6 +68,8 @@ class CommReceiver(service.persistent):
                 self._request_info_handler(data)
             elif type in ['stop-resp']:
                 self._stop_resp_handler(data)
+            elif type in ['beacon']:
+                self._beacon_handler(data)
 
 
     def _request_handler(self, data):      
@@ -80,6 +83,13 @@ class CommReceiver(service.persistent):
             response_msg = messages.create('request-info',comm.params['id'], msg['orig'],'comm_receiver', response)
             messages.send(comm.params['ports'][msg['orig']], response_msg)
             rospy.loginfo("Sent: " + response_msg)
+
+    def _beacon_handler(self, data):
+        try:
+            rospy.loginfo('Received: '+ data)
+            msg = messages.parse(data)
+        except Exception as e:
+            rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
 
 
     def _publish_coordinated_vel(self, vel):
@@ -106,7 +116,7 @@ class CommReceiver(service.persistent):
         for i,ttn in enumerate(sorted_ttn):
             if ttn[0] == comm.params['id']:
                 rank_t = (10**i)*sorted_ttn[0][1]
-                vel.linear.x = (1-i)*0.5#comm.current_distance / rank_t
+                vel.linear.x = 0.5 * math.exp(-10*i)#comm.current_distance / rank_t
                 rospy.loginfo('Rank: '+ str(i)+' Vel: '+str(vel.linear.x)+ ' TTN: '+str(rank_t)) 
                 break
 

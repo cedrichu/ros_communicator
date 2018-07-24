@@ -4,6 +4,7 @@
 import comm
 import service
 import socket
+from bluetooth import *
 import time
 import math
 import threading
@@ -20,7 +21,19 @@ class sendClient(service.persistent):
     self.event = threading.Event()
     self.batch = comm.params['queue']['batch']
     self.daemon = True
-    
+    self.connected = False
+
+    #self.sock = BluetoothSocket( RFCOMM )
+    #self.sock.connect(self.addr)
+  # def pre(self):
+  #   self.sock = BluetoothSocket(RFCOMM)
+  #   try:
+  #     self.sock.connect(self.addr)
+  #     rospy.loginfo('Connection ok!')
+  #     self.connected = True
+  #   except Exception as e:
+  #     rospy.logwarn('Cannot pre-connect to %s: %s'%(str(self.addr),e))
+
   def restart(self):
     self.quit()
     self.__init__(self.addr)
@@ -32,16 +45,19 @@ class sendClient(service.persistent):
     except Exception as e:
       rospy.logerr('Cannot put data (%s) in queue for (%s): %s'%(str(data),str(self.addr),e))
   def send(self,data):
-    sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    #sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    self.sock = BluetoothSocket( RFCOMM )
     try:
-      sock.connect(self.addr)
+      self.sock.connect(self.addr)
+      #pass
     except Exception as e:
       rospy.logwarn('Cannot connect to %s: %s'%(str(self.addr),e))
       return False
     else:
       try:
-        sock.send(data)
-      except:
+        self.sock.send(data)
+        #self.sock.send('\n')
+      except Exception as e:
         rospy.logwarn('Cannot send data to %s: %s'%(str(self.addr),e))
         return False
       else:
@@ -100,7 +116,7 @@ class sendQueue():
   def ready(self,addr):
     with self.lock:
       if addr in self.conns.keys():
-        if self.conns[addr].isAlive():
+        if self.conns[addr].isAlive():# and self.conns[addr].connected:
           return True
         else:
           try:
