@@ -13,7 +13,7 @@ params = dict()
 params['id'] = 'freight3'
 params['queue'] = dict()
 params['queue']['batch'] = 50
-params['threshold'] = 3
+params['threshold'] = 4.5
 
 
 neighbor_list = ['freight20']
