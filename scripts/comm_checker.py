@@ -15,7 +15,7 @@ class CommChecker(service.persistent):
         self.name = 'comm_checker'
         self.daemon = False
 
-        self.rate = rospy.Rate(10) # 10hz
+        self.rate = rospy.Rate(comm.params['rate']) # 10hz
         #variable for coordination
         self.current_node = None
         self.last_node = dict(x=0.0, y=0.0, id=-1)

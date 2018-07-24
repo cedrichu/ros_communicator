@@ -13,7 +13,7 @@ params = dict()
 params['id'] = 'freight3'
 params['queue'] = dict()
 params['queue']['batch'] = 50
-params['threshold'] = 1.5
+params['threshold'] = 3
 
 
 neighbor_list = ['freight20']
@@ -22,6 +22,8 @@ params['ports'] = dict()
 params['ports']['local'] = dict()
 params['ports']['local']['receiver'] = ('',60998) 
 params['ports'][neighbor_list[0]] = (neighbor_list[0],60998)
+
+params['rate'] = 10
 
 
 
