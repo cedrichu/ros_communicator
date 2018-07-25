@@ -135,7 +135,6 @@ class CommReceiver(service.persistent):
     def _request_info_handler(self, data):
         try:
             rospy.loginfo('Received: '+ data+' current_node: '+str(comm.current_node['id']))
-            
             #stop current running pub thread
             self.stop_pub.set()
             time.sleep(0.1)

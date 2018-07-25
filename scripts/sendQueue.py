@@ -35,7 +35,7 @@ class sendClient(service.persistent):
       except Exception as e:
         self.sock.close()
         time.sleep(5)
-        rospy.logwarn('Cannot pre-connect to %s: %s'%(str(self.addr),e))
+        rospy.loginfo('Wait for connecting to %s: %s'%(str(self.addr),e))
 
   def restart(self):
     self.quit()
