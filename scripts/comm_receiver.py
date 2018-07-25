@@ -116,7 +116,7 @@ class CommReceiver(service.persistent):
         for i,ttn in enumerate(sorted_ttn):
             if ttn[0] == comm.params['id']:
                 rank_t = (10**i)*sorted_ttn[0][1]
-                vel.linear.x = 0.5 * math.exp(-10*i)#comm.current_distance / rank_t
+                vel.linear.x = 1 * math.exp(-i)#comm.current_distance / rank_t
                 rospy.loginfo('Rank: '+ str(i)+' Vel: '+str(vel.linear.x)+ ' TTN: '+str(rank_t)) 
                 break
 

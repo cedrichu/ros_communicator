@@ -129,17 +129,18 @@ class receiver(client):
           rospy.logerr('Could not receive data: %s'%e)
           break
       else:
-        # try:
-        #   self.handler(data)
-        # except Exception as e:
-        #   rospy.logerr('Could not handle data: %s (%s)'%(data,e))
+        try:
+          self.handler(data)
+        except Exception as e:
+          rospy.logerr('Could not handle data: %s (%s)'%(data,e))
         #data = d
-        break
+        #break
         #if d == '\n':
           #break
     #self.sockclose()
-    try:
-      self.handler(data)
-    except Exception as e:
-      rospy.logerr('Could not handle data: %s (%s)'%(data,e))
+    
+    # try:
+    #   self.handler(data)
+    # except Exception as e:
+    #   rospy.logerr('Could not handle data: %s (%s)'%(data,e))
 

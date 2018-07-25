@@ -13,19 +13,19 @@ params = dict()
 params['id'] = 'freight3'
 params['queue'] = dict()
 params['queue']['batch'] = 50
-params['threshold'] = 1.5
+params['threshold'] = 4
 
 
 neighbor_list = ['freight20']
 
 params['ports'] = dict()
 params['ports']['local'] = dict()
-params['ports']['local']['receiver'] = ('',1) 
+params['ports']['local']['receiver'] = ('',2) 
 
 params['ports'][neighbor_list[0]] = ('00:16:6F:EB:05:77',1) #freight20
-#params['ports'][neighbor_list[0]] = ('00:16:6F:EA:FE:D3',1) #freight3
+#params['ports'][neighbor_list[0]] = ('00:16:6F:EA:FE:D3',2) #freight3
 
-params['rate'] = 5
+params['rate'] = 15
 
 
 #shared information?

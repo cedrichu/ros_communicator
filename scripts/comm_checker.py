@@ -29,8 +29,8 @@ class CommChecker(service.persistent):
        
         neighbors = self._search_neighbor() #TODO: BT-find neighbors
         #establish connection with neighbor robots
-        # for dest in neighbors:
-        #     messages.sender.ready(comm.params['ports'][dest])
+        for dest in neighbors:
+            messages.sender.ready(comm.params['ports'][dest])
         
         #get the near node the robot is approaching
         self.current_node, distance = comm.get_current_node()
@@ -51,12 +51,12 @@ class CommChecker(service.persistent):
                     rospy.loginfo('Sent: '+ msg)
                 comm.state = 'QUERY'
                 rospy.loginfo('Current State: %s'%comm.state)
-            else:
-                for dest in neighbors:
-                    msg_content = [comm.params['id']]
-                    msg = messages.create('beacon',comm.params['id'], dest,'comm_checker', msg_content)
-                    messages.send(comm.params['ports'][dest],msg)
-                    rospy.loginfo('Sent: '+ msg)
+            # else:
+            #     for dest in neighbors:
+            #         msg_content = [comm.params['id']]
+            #         msg = messages.create('beacon',comm.params['id'], dest,'comm_checker', msg_content)
+            #         messages.send(comm.params['ports'][dest],msg)
+            #         rospy.loginfo('Sent: '+ msg)
 
 
         elif comm.state == 'DONE':
