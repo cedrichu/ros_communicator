@@ -15,14 +15,15 @@ params['queue'] = dict()
 params['queue']['batch'] = 50
 params['threshold'] = 4
 
+addr2robot = {'00:16:6F:EA:FE:D3' : 'freight3' , '00:16:6F:EB:05:77': 'freight20'}
 
-neighbor_list = ['freight20']
+neighbor_list = []
 
 params['ports'] = dict()
 params['ports']['local'] = dict()
-params['ports']['local']['receiver'] = ('',2) 
+params['ports']['local']['receiver'] = ('',1) 
 
-params['ports'][neighbor_list[0]] = ('00:16:6F:EB:05:77',1) #freight20
+#params['ports'][neighbor_list[0]] = ('00:16:6F:EB:05:77',1) #freight20
 #params['ports'][neighbor_list[0]] = ('00:16:6F:EA:FE:D3',2) #freight3
 
 params['rate'] = 15

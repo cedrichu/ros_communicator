@@ -2,6 +2,7 @@
 import rospy
 import socket                                         
 import time
+from bluetooth import *
 
 
 import service
@@ -22,24 +23,44 @@ class CommChecker(service.persistent):
         
     
     def _search_neighbor(self):
+        if comm.state == 'IDLE' and self.current_node != self.last_node:
+            nearby_devices = discover_devices(
+                duration=5, lookup_names=False, flush_cache=True, lookup_class=False)
+            comm.neighbor_list = []
+            if nearby_devices:
+                for addr in nearby_devices:
+                    if addr in comm.addr2robot.keys():
+                        robot = comm.addr2robot[addr]
+                        comm.neighbor_list.append(robot)
+                        comm.params['ports'][robot] = (addr, 1)
+                        rospy.loginfo('Find robot %s on %s' %(robot, addr))
+
+                time.sleep(8)
+
+                if comm.neighbor_list:
+                    for dest in comm.neighbor_list:
+                        #establish connection with neighbor robots
+                        messages.sender.ready(comm.params['ports'][dest])
+
+
+
         return comm.neighbor_list
 
     def main(self):
 
        
         neighbors = self._search_neighbor() #TODO: BT-find neighbors
-        #establish connection with neighbor robots
-        for dest in neighbors:
-            messages.sender.ready(comm.params['ports'][dest])
         
+
         #get the near node the robot is approaching
         self.current_node, distance = comm.get_current_node()
-        if not self.current_node and distance == 0.0:
+        if not self.current_node and distance == 0.0 or not neighbors:
             #rospy.loginfo('No current node and just pass this iteration')
             return
 
         if self.current_node != self.last_node:
-            rospy.loginfo('Switch from node %s to %s'%(self.last_node['id'], self.current_node['id']))
+            rospy.loginfo('Switch from node %s to %s'
+                %(self.last_node['id'], self.current_node['id']))
 
         if comm.state == 'IDLE':
             
