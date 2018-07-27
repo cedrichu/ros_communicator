@@ -23,6 +23,7 @@ class CommChecker(service.persistent):
         
     
     def _search_neighbor(self):
+        #TODO: when to set SEARCH state?? timer? now it is because of empty list
         if comm.state == 'SEARCH' or not comm.neighbor_list:
             nearby_devices = discover_devices(
                 duration=5, lookup_names=False, flush_cache=True, lookup_class=False)
@@ -48,15 +49,19 @@ class CommChecker(service.persistent):
         return comm.neighbor_list
 
     def main(self):
+        self.checker()
+        self.last_node = self.current_node            
+        self.rate.sleep()
 
+    def checker(self):
        
         neighbors = self._search_neighbor() #TODO: BT-find neighbors
+        if not neighbors:
+            return
         
-
         #get the near node the robot is approaching
         self.current_node, distance = comm.get_current_node()
-        if not self.current_node and distance == 0.0 or not neighbors:
-            #rospy.loginfo('No current node and just pass this iteration')
+        if not self.current_node and distance == 0.0:
             return
 
         if self.current_node != self.last_node:
@@ -66,6 +71,7 @@ class CommChecker(service.persistent):
         if comm.state == 'IDLE':
             
             if distance < comm.params['threshold'] and self.current_node == self.last_node:
+                comm.send_number = len(neighbors)
                 for dest in neighbors:
                     msg_content = [comm.params['id']]
                     msg = messages.create('request',comm.params['id'], dest,'comm_checker', msg_content)
@@ -73,14 +79,7 @@ class CommChecker(service.persistent):
                     rospy.loginfo('Sent: '+ msg)
                 comm.state = 'QUERY'
                 rospy.loginfo('Current State: %s'%comm.state)
-            # else:
-            #     for dest in neighbors:
-            #         msg_content = [comm.params['id']]
-            #         msg = messages.create('beacon',comm.params['id'], dest,'comm_checker', msg_content)
-            #         messages.send(comm.params['ports'][dest],msg)
-            #         rospy.loginfo('Sent: '+ msg)
-
-
+            
         elif comm.state == 'DONE':
 
             if distance < comm.params['threshold'] and self.current_node == self.last_node:
@@ -114,9 +113,7 @@ class CommChecker(service.persistent):
                 comm.state = 'IDLE'
                 rospy.loginfo('Current State: %s'%comm.state)
 
-        self.last_node = self.current_node            
-        self.rate.sleep()
-
+        
   
 
 if __name__ == '__main__':

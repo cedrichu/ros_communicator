@@ -38,6 +38,7 @@ current_distance = 0.0
 current_vel = 0.0
 delta = 0.5
 send_count = 0 #recording how many responses received within each query
+#send_number = 0 #recording how many requests are sent
 approaching_dict = dict() #The valid set of neighbors
 
 
