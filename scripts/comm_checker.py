@@ -23,7 +23,7 @@ class CommChecker(service.persistent):
         
     
     def _search_neighbor(self):
-        if comm.state == 'IDLE' and self.current_node != self.last_node:
+        if comm.state == 'SEARCH' or not comm.neighbor_list:
             nearby_devices = discover_devices(
                 duration=5, lookup_names=False, flush_cache=True, lookup_class=False)
             comm.neighbor_list = []
@@ -41,6 +41,7 @@ class CommChecker(service.persistent):
                     for dest in comm.neighbor_list:
                         #establish connection with neighbor robots
                         messages.sender.ready(comm.params['ports'][dest])
+            comm.state = 'IDLE'
 
 
 

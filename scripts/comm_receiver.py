@@ -128,7 +128,7 @@ class CommReceiver(service.persistent):
 
     def _maintain_approaching_robots(self, msg):
         n_id, n_node_id, n_dist, n_vel = msg['data']
-        if n_node_id == comm.current_node['id']: 
+        if n_node_id == comm.current_node['id'] and n_dist < comm.params['threshold']: 
             comm.approaching_dict[n_id] = (n_dist, n_vel)
         else:
             # this robot already left the intersection
@@ -144,7 +144,6 @@ class CommReceiver(service.persistent):
             time.sleep(0.1)
             
             msg = messages.parse(data)
-            n_id, n_node_id, n_dist, n_vel = msg['data'] 
         except Exception as e:
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
         else:
@@ -193,6 +192,8 @@ class CommReceiver(service.persistent):
                 comm.send_count = 0
         except Exception as e:
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))
+        else:
+            comm.state = 'SEARCH'
 
     def main(self):
 
