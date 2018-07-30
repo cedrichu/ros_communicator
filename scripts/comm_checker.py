@@ -19,6 +19,7 @@ class CommChecker(service.persistent):
         self.rate = rospy.Rate(comm.params['rate']) # 10hz
         #variable for coordination
         self.current_node = None
+        self.distance = 0.0
         self.last_node = dict(x=0.0, y=0.0, id=-1)
         
     
@@ -42,14 +43,31 @@ class CommChecker(service.persistent):
                     for dest in comm.neighbor_list:
                         #establish connection with neighbor robots
                         messages.sender.ready(comm.params['ports'][dest])
+                else:
+                    rospy.loginfo('No neighbor is found.')
+            else:
+                rospy.loginfo('No neighbor is found.')
+
+            comm.search_time = time.time()
             comm.state = 'IDLE'
+            rospy.loginfo('Search is done. Current State: %s'%comm.state)
 
 
 
         return comm.neighbor_list
 
     def main(self):
+        #get the near node the robot is approaching
+        self.current_node, self.distance = comm.get_current_node()
+        if not self.current_node and self.distance == 0.0:
+            return
+
+        if self.current_node != self.last_node:
+            rospy.loginfo('Switch from node %s to %s'
+                %(self.last_node['id'], self.current_node['id']))
+
         self.checker()
+
         self.last_node = self.current_node            
         self.rate.sleep()
 
@@ -58,19 +76,10 @@ class CommChecker(service.persistent):
         neighbors = self._search_neighbor() #TODO: BT-find neighbors
         if not neighbors:
             return
-        
-        #get the near node the robot is approaching
-        self.current_node, distance = comm.get_current_node()
-        if not self.current_node and distance == 0.0:
-            return
-
-        if self.current_node != self.last_node:
-            rospy.loginfo('Switch from node %s to %s'
-                %(self.last_node['id'], self.current_node['id']))
-
+                
         if comm.state == 'IDLE':
             
-            if distance < comm.params['threshold'] and self.current_node == self.last_node:
+            if self.distance < comm.params['threshold'] and self.current_node == self.last_node:
                 comm.send_number = len(neighbors)
                 for dest in neighbors:
                     msg_content = [comm.params['id']]
@@ -79,10 +88,13 @@ class CommChecker(service.persistent):
                     rospy.loginfo('Sent: '+ msg)
                 comm.state = 'QUERY'
                 rospy.loginfo('Current State: %s'%comm.state)
-            
+            elif (time.time() - comm.search_time) > comm.search_period:
+                comm.state = 'SEARCH'
+                rospy.loginfo('Current State: %s'%comm.state)
+
         elif comm.state == 'DONE':
 
-            if distance < comm.params['threshold'] and self.current_node == self.last_node:
+            if self.distance < comm.params['threshold'] and self.current_node == self.last_node:
                 for dest in neighbors:
                     msg_content = [comm.params['id']]
                     msg = messages.create('request',comm.params['id'], dest,'comm_checker', msg_content)

@@ -39,6 +39,8 @@ current_vel = 0.0
 delta = 0.5
 send_count = 0 #recording how many responses received within each query
 #send_number = 0 #recording how many requests are sent
+search_period = 60
+search_time = time.time()
 approaching_dict = dict() #The valid set of neighbors
 
 
