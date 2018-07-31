@@ -116,6 +116,8 @@ class CommChecker(service.persistent):
         elif comm.state == 'QUERY':
             
             if self.current_node != self.last_node:
+                while comm.state != 'DONE':
+                    pass
                 for dest in neighbors:
                     msg_content = [comm.params['id']]
                     msg = messages.create('stop',comm.params['id'], dest,'comm_checker', msg_content)
