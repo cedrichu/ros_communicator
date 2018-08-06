@@ -115,22 +115,20 @@ class CommReceiver(service.persistent):
         time_to_node = dict()
         #get neighbors' time_to_node 
         for key,value in comm.approaching_dict.iteritems():
-            time_to_node[key] = value[0]#/max(value[1], 0.1)
+            time_to_node[key] = value[0]
+
         #Add my time_to_node into the dict
-        rospy.loginfo('current distance: '+ str(comm.current_distance)
-            + ' current velocity: '+ str(comm.current_vel))
-        time_to_node[comm.params['id']] = comm.current_distance#/max(comm.current_vel, 0.1)
+        rospy.loginfo('current distance: '+ str(comm.current_distance) + ' current velocity: '+ str(comm.current_vel))
+        time_to_node[comm.params['id']] = comm.current_distance
         rospy.loginfo('current time_to_node: '+ str(time_to_node[comm.params['id']]))
 
+        #prioritize speed based on their distance to current node
         sorted_ttn = sorted(time_to_node.items(), key=operator.itemgetter(1))
         for i,ttn in enumerate(sorted_ttn):
             if ttn[0] == comm.params['id']:
-                rank_t = (10**i)*sorted_ttn[0][1]
-                vel.linear.x = 1 * math.exp(-2*i)#comm.current_distance / rank_t
-                rospy.loginfo('Rank: '+ str(i)+' Vel: '
-                    +str(vel.linear.x)+ ' TTN: '+str(rank_t)) 
+                vel.linear.x = 1 * math.exp(-2*i)
+                rospy.loginfo('Rank: '+ str(i)+' Vel: '+str(vel.linear.x)) 
                 break
-
         return vel
 
     def _maintain_approaching_robots(self, msg):
@@ -164,22 +162,24 @@ class CommReceiver(service.persistent):
                 #if the list is empty, we don't need to apply velocity coordination
                 rospy.loginfo('approaching_dict: '+str(comm.approaching_dict))
                 if comm.approaching_dict: 
+                    #Calculated coordinated velocity from all shared information
                     vel = self._intersection_coordination()
                     rospy.loginfo(str(vel))
+                    #Publish coordinated velocity to speed governor
                     self.pub_vel_thread = threading.Thread(
                         target=self._publish_coordinated_vel, args=(vel,))
                     self.stop_pub.clear()
+                    #Publishing thread starts
                     self.pub_vel_thread.start()
                 else:
                     rospy.loginfo('rollback to single agent')
                     self.stop_pub.set() #no other approach robots, then just stop control
                     self._publish_original_vel()
                     
-
                 comm.send_count = 0
                 comm.state = 'DONE'
                 rospy.loginfo('Current State: %s'%comm.state)
-            #elif n_node in comm.nodes:
+            
 
     def _stop_handler(self, data):
         try:

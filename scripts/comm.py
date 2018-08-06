@@ -9,38 +9,36 @@ import numpy as np
 
 
 params = dict()
-
+#robot name
 params['id'] = 'freight3'
 params['queue'] = dict()
 params['queue']['batch'] = 50
+#The coordination zone (distance from current node to curren pose)
 params['threshold'] = 4.5
+#Reset speed after coordination
 params['max_speed'] = 1.5
-
-addr2robot = {'00:16:6F:EA:FE:D3' : 'freight3' , '00:16:6F:EB:05:77': 'freight20'}
-
-neighbor_list = []
-
+#A mapping of bt addr and robots, which should be accessible from fetchcore in the beginning
+params['addr2robot'] = {'00:16:6F:EA:FE:D3' : 'freight3' , '00:16:6F:EB:05:77': 'freight20'}
 params['ports'] = dict()
 params['ports']['local'] = dict()
+#BT port #TODO: how to efficiently utilize all ports
 params['ports']['local']['receiver'] = ('',1) 
-
-#params['ports'][neighbor_list[0]] = ('00:16:6F:EB:05:77',1) #freight20
-#params['ports'][neighbor_list[0]] = ('00:16:6F:EA:FE:D3',2) #freight3
-
+#ros rate
 params['rate'] = 15
+#time for searching neighbors
+params['search_period'] =  60
 
 
-#shared information?
+neighbor_list = []
+#shared information
 state = 'IDLE'
 nodes = []
 current_pose = None
 current_node = None
 current_distance = 0.0
 current_vel = 0.0
-delta = 0.5
 send_count = 0 #recording how many responses received within each query
 #send_number = 0 #recording how many requests are sent
-search_period = 60
 search_time = time.time()
 approaching_dict = dict() #The valid set of neighbors
 
