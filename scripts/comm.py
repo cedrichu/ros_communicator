@@ -14,6 +14,7 @@ params['id'] = 'freight3'
 params['queue'] = dict()
 params['queue']['batch'] = 50
 params['threshold'] = 4.5
+params['max_speed'] = 1.5
 
 addr2robot = {'00:16:6F:EA:FE:D3' : 'freight3' , '00:16:6F:EB:05:77': 'freight20'}
 

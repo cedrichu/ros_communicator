@@ -9,6 +9,7 @@ import service
 import messages
 import comm
 
+from geometry_msgs.msg import Twist
 
 class CommChecker(service.persistent):
     def __init__(self):
@@ -21,6 +22,8 @@ class CommChecker(service.persistent):
         self.current_node = None
         self.distance = 0.0
         self.last_node = dict(x=0.0, y=0.0, id=-1)
+
+        #self.comm_vel_pub = rospy.Publisher('/comm_vel', Twist, queue_size=10)
         
     
     def _search_neighbor(self):
@@ -66,7 +69,12 @@ class CommChecker(service.persistent):
             rospy.loginfo('Switch from node %s to %s'
                 %(self.last_node['id'], self.current_node['id']))
 
+
+
         self.checker()
+        # vel = Twist()
+        # vel.linear.x = 1
+        # self.comm_vel_pub.publish(vel)
 
         self.last_node = self.current_node            
         self.rate.sleep()

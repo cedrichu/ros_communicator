@@ -101,6 +101,13 @@ class CommReceiver(service.persistent):
         rospy.loginfo('thread stops! '+ str(threading.current_thread()))
 
 
+    def _publish_original_vel(self):
+        vel = Twist()
+        vel.linear.x = comm.params['max_speed']
+        self.pub.publish(vel)
+
+
+
     def _intersection_coordination(self):
         #Assume the processing time of each job is same
         #TODO: different processing time?
@@ -141,6 +148,7 @@ class CommReceiver(service.persistent):
             rospy.loginfo('Received: '+ data+' current_node: '+str(comm.current_node['id']))
             #stop current running pub thread
             self.stop_pub.set()
+            self._publish_original_vel()
             time.sleep(0.1)
             
             msg = messages.parse(data)
@@ -165,6 +173,9 @@ class CommReceiver(service.persistent):
                 else:
                     rospy.loginfo('rollback to single agent')
                     self.stop_pub.set() #no other approach robots, then just stop control
+                    self._publish_original_vel()
+                    
+
                 comm.send_count = 0
                 comm.state = 'DONE'
                 rospy.loginfo('Current State: %s'%comm.state)
@@ -189,6 +200,7 @@ class CommReceiver(service.persistent):
             comm.send_count += 1
             if comm.send_count == len(comm.neighbor_list):
                 self.stop_pub.set()
+                self._publish_original_vel()
                 comm.send_count = 0
         except Exception as e:
             rospy.logwarn('Could not parse data: %s (%s)'%(str(data),e))

@@ -19,7 +19,7 @@ class Communicator():
 		rospy.Subscriber("/fetchcore/annotations/lanes", FetchcoreLaneArray, self._nodes_handler)
 		rospy.Subscriber("/base_controller/command_full", DriveCommand, self._vel_handler)
 		rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self._pose_handler)
-		self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+		self.comm_vel_pub = rospy.Publisher('/comm_vel', Twist, queue_size=10)
 
 		#Mock for PC
 		# comm.nodes = [dict(x=-26, y=-135, id=11)]
@@ -31,7 +31,7 @@ class Communicator():
 			pass
 
 		self.checker = CommChecker()
-		self.receiver = CommReceiver(self.cmd_vel_pub)
+		self.receiver = CommReceiver(self.comm_vel_pub)
 
 
 	def _nodes_handler(self, msg):
