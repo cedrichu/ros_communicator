@@ -120,6 +120,7 @@ class sendQueue():
     with self.lock:
       if addr in self.conns.keys():
         if self.conns[addr].isAlive():# and self.conns[addr].connected:
+          print 'sender existed and alive'
           return True
         else:
           try:
@@ -129,6 +130,7 @@ class sendQueue():
             rospy.logerr('Cannot restart sending client for %s'%str(addr))
             return False
           else:
+            print 'sender restart.'
             return True
       else:
         try:
@@ -138,6 +140,7 @@ class sendQueue():
           rospy.logerr('Cannot create sending client for %s'%str(addr))
           return False
         else:
+          print 'sender new start!'
           return True
   def stop(self):
     self.stayAlive = False

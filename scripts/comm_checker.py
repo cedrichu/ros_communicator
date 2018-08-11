@@ -29,6 +29,12 @@ class CommChecker(service.persistent):
     def _search_neighbor(self):
         #TODO: when to set SEARCH state?? timer? now it is because of empty list
         if comm.state == 'SEARCH' or not comm.neighbor_list:
+            
+            if comm.neighbor_list:
+                for dest in comm.neighbor_list:
+                    messages.sender.conns[comm.params['ports'][dest]].stop()
+                messages.sender.conns = dict()
+
             nearby_devices = discover_devices(
                 duration=5, lookup_names=False, flush_cache=True, lookup_class=False)
             comm.neighbor_list = []
